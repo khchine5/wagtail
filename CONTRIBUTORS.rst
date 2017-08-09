@@ -247,6 +247,8 @@ Contributors
 * dwasyl
 * Eugene Morozov
 * Levi Adler
+* Edwar Baron
+* cho-leukeleu
 
 Translators
 ===========

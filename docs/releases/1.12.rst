@@ -24,6 +24,10 @@ Other features
  * The admin interface now displays a title of the latest draft (Mikalai Radchuk)
  * Added multi-select form field to the form builder (dwasyl)
  * Improved performance of sitemap generation (Levi Adler)
+ * StreamField now respects the ``blank`` setting; StreamBlock accepts a ``required`` setting (Loic Teixeira)
+ * StreamBlock now accepts ``min_num``, ``max_num`` and ``block_counts`` settings to control the minimum and maximum numbers of blocks (Edwar Baron, Matt Westcott)
+ * Users can no longer remove their own active / superuser flags through Settings -> Users (Stein Strindhaug, Huub Bouma)
+ * The ``process_form_submission`` method of form pages now return the created form submission object (cho-leukeleu)
 
 Bug fixes
 ~~~~~~~~~
@@ -33,12 +37,42 @@ Bug fixes
  * Redirects with unicode characters now work (Rich Brennan)
  * Prevent explorer view from crashing when page model definitions are missing, allowing the offending pages to be deleted (Matt Westcott)
  * Hide the userbar from printed page representation (Eugene Morozov)
-
+ * Prevent the page editor footer content from collapsing into two lines unnecessarily (Jack Paine)
+ * StructBlock values no longer render HTML templates as their ``str`` representation, to prevent infinite loops in debugging / logging tools (Matt Westcott)
+ * Removed deprecated jQuery ``load`` call from TableBlock initialisation (Jack Paine)
+ * Position of options in mobile nav-menu (Jack Paine)
+ * Center page editor footer regardless of screen width (Jack Paine)
 
 Upgrade considerations
 ======================
+
+StreamField now defaults to ``blank=False``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+StreamField now respects the ``blank`` field setting; when this is false, at least one block must be supplied for the field to pass validation. To match the behaviour of other model fields, ``blank`` defaults to ``False``; if you wish to allow a StreamField to be left empty, you must now add ``blank=True`` to the field.
+
 
 Old configuration settings for embeds are deprecated
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The configuration settings ``WAGTAILEMBEDS_EMBED_FINDER`` and ``WAGTAILEMBEDS_EMBEDLY_KEY`` have been deprecated in favour of the new ``WAGTAILEMBEDS_FINDERS`` setting. Please see :ref:`configuring_embed_finders` for the new configuration to use.
+
+
+Custom ``get_admin_display_title`` methods should use ``draft_title``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This release introduces a new ``draft_title`` field on page models, so that page titles as used across the admin interface will correctly reflect any changes that exist in draft. If any of your page models override the ``get_admin_display_title`` method, to customise the display of page titles in the admin, it is recommended that you now update these to base their output on ``draft_title`` rather than ``title``. Alternatively, to preserve backwards compatibility, you can invoke ``super`` on the method, for example:
+
+.. code-block:: python
+
+    def get_admin_display_title(self):
+        return "%(title)s (%(lang)s)" % {
+            'title': super(TranslatablePage, self).get_admin_display_title(),
+            'lang': self.language_code,
+        }
+
+
+Fixtures for loading pages should include ``draft_title``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In most situations, the new ``draft_title`` field on page models will automatically be populated from the page title. However, this is not the case for pages that are created from fixtures. Projects that use fixtures to load initial data should therefore ensure that a ``draft_title`` field is specified.
