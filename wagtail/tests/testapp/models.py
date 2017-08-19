@@ -289,8 +289,8 @@ class SingleEventPage(EventPage):
     )
 
     # Give this page model a custom URL routing scheme
-    def get_url_parts(self):
-        url_parts = super(SingleEventPage, self).get_url_parts()
+    def get_url_parts(self, request=None):
+        url_parts = super(SingleEventPage, self).get_url_parts(request=request)
         if url_parts is None:
             return None
         else:
@@ -908,6 +908,15 @@ class CustomRichBlockFieldPage(Page):
     content_panels = [
         FieldPanel('title', classname="full title"),
         StreamFieldPanel('body'),
+    ]
+
+
+class RichTextFieldWithFeaturesPage(Page):
+    body = RichTextField(features=['blockquote', 'embed', 'made-up-feature'])
+
+    content_panels = [
+        FieldPanel('title', classname="full title"),
+        FieldPanel('body'),
     ]
 
 
