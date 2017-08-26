@@ -250,6 +250,9 @@ Contributors
 * Edwar Baron
 * Tomasz Knapik
 * Emily Horsman
+* jcronyn
+* Ben Sturmfels
+* Anselm Bradford
 
 Translators
 ===========
