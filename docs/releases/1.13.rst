@@ -15,6 +15,8 @@ Other features
 ~~~~~~~~~~~~~~
 
  * :doc:`Custom document model </advanced_topics/documents/custom_document_model>` is now documented (Emily Horsman)
+ * Use minified versions of CSS in the admin by adding minification to the front-end tooling (Vincent Audebert, Thibaud Colas)
+ * Wagtailforms serve view now passes ``request.FILES``, for use in custom form handlers (LB (Ben Johnston))
 
 
 Bug fixes
@@ -25,8 +27,8 @@ Bug fixes
  * Inline panel first and last sorting arrows correctly hidden in non-default tabs (Matt Westcott)
  * ``WAGTAILAPI_LIMIT_MAX`` now accepts None to disable limiting (jcronyn)
  * In PostgreSQL, new default ordering when ranking of objects is the same (Bertrand Bordage)
- * Enabled translations within date-time chooser widget (Lucas Moeskops)
  * Fixed overlapping header elements on form submissions view on mobile (Jack Paine)
+ * Fixed avatar position in footer on mobile (Jack Paine)
 
 
 Upgrade considerations
