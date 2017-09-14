@@ -14,6 +14,17 @@ Changelog
  * Fix: In PostgreSQL, new default ordering when ranking of objects is the same (Bertrand Bordage)
  * Fix: Fixed overlapping header elements on form submissions view on mobile (Jack Paine)
  * Fix: Fixed avatar position in footer on mobile (Jack Paine)
+ * Fix: Custom document models no longer require their own post-delete signal handler (Gordon Pendleton)
+ * Fix: Deletion of image / document files now only happens when database transaction has completed (Gordon Pendleton)
+
+
+1.12.2 (xx.xx.xxxx) - IN DEVELOPMENT
+~~~~~~~~~~~~~~~~~~~
+
+ * Fix: Migration for addition of `Page.draft_title` field is now reversible (Venelin Stoykov)
+ * Fix: Fixed failure on application startup when `ManifestStaticFilesStorage` is in use and `collectstatic` has not yet been run (Matt Westcott)
+ * Fix: Fixed handling of Vimeo and other oEmbed providers with a format parameter in the endpoint URL (Mitchel Cabuloy)
+ * Fix: Fixed regression in rendering save button in wagtail.contrib.settings edit view (Matt Westcott)
 
 
 1.12.1 (30.08.2017)

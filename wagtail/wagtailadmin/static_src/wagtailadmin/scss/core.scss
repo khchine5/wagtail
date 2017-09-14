@@ -138,12 +138,12 @@ footer {
     }
 
     .actions {
+        width: 250px;
         margin-right: $grid-gutter-width / 2;
-        width: auto;
+    }
 
-        .dropdown {
-            width: 250px;
-        }
+    .preview .dropdown {
+        width: 250px;
     }
 
     .meta {
@@ -168,12 +168,10 @@ footer {
     }
 
     @media screen and (max-width: $breakpoint-mobile) {
-        .actions {
+        .actions,
+        .preview,
+        .preview .dropdown {
             width: 100%;
-
-            .dropdown {
-                width: 100%;
-            }
         }
 
         .meta p {
