@@ -7,6 +7,8 @@ Changelog
  * Custom document model is now documented (Emily Horsman)
  * Use minified versions of CSS in the admin by adding minification to the front-end tooling (Vincent Audebert, Thibaud Colas)
  * Wagtailforms serve view now passes `request.FILES`, for use in custom form handlers (LB (Ben Johnston))
+ * Documents and images are now given new filenames on re-uploading, to avoid old versions being kept in cache (Bertrand Bordage)
+ * Added custom 404 page for admin interface (Jack Paine)
  * Fix: "Open Link in New Tab" on a right arrow in page explorer should open page list (Emily Horsman)
  * Fix: Using `order_by_relevance=False` when searching with PostgreSQL now works (Mitchel Cabuloy)
  * Fix: Inline panel first and last sorting arrows correctly hidden in non-default tabs (Matt Westcott)
@@ -16,9 +18,10 @@ Changelog
  * Fix: Fixed avatar position in footer on mobile (Jack Paine)
  * Fix: Custom document models no longer require their own post-delete signal handler (Gordon Pendleton)
  * Fix: Deletion of image / document files now only happens when database transaction has completed (Gordon Pendleton)
+ * Fix: Fixed Node build scripts to work on Windows (Mikalai Radchuk)
 
 
-1.12.2 (xx.xx.xxxx) - IN DEVELOPMENT
+1.12.2 (18.09.2017)
 ~~~~~~~~~~~~~~~~~~~
 
  * Fix: Migration for addition of `Page.draft_title` field is now reversible (Venelin Stoykov)

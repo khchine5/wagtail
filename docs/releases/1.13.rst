@@ -17,6 +17,8 @@ Other features
  * :doc:`Custom document model </advanced_topics/documents/custom_document_model>` is now documented (Emily Horsman)
  * Use minified versions of CSS in the admin by adding minification to the front-end tooling (Vincent Audebert, Thibaud Colas)
  * Wagtailforms serve view now passes ``request.FILES``, for use in custom form handlers (LB (Ben Johnston))
+ * Documents and images are now given new filenames on re-uploading, to avoid old versions being kept in cache (Bertrand Bordage)
+ * Added custom 404 page for admin interface (Jack Paine)
 
 
 Bug fixes
@@ -31,6 +33,7 @@ Bug fixes
  * Fixed avatar position in footer on mobile (Jack Paine)
  * Custom document models no longer require their own post-delete signal handler (Gordon Pendleton)
  * Deletion of image / document files now only happens when database transaction has completed (Gordon Pendleton)
+ * Fixed Node build scripts to work on Windows (Mikalai Radchuk)
 
 
 Upgrade considerations
