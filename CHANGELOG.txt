@@ -1,9 +1,16 @@
 Changelog
 =========
 
+2.0 (xx.xx.xxxx) - IN DEVELOPMENT
+~~~~~~~~~~~~~~~~
+
+ * Removed support for Python 2.7, Django 1.8 and Django 1.10
+
+
 1.13 (xx.xx.xxxx) - IN DEVELOPMENT
 ~~~~~~~~~~~~~~~~~
 
+ * Front-end cache invalidator now supports purging URLs as a batch (Karl Hobley)
  * Custom document model is now documented (Emily Horsman)
  * Use minified versions of CSS in the admin by adding minification to the front-end tooling (Vincent Audebert, Thibaud Colas)
  * Wagtailforms serve view now passes `request.FILES`, for use in custom form handlers (LB (Ben Johnston))
@@ -13,6 +20,7 @@ Changelog
  * Updated React to 15.6.2 due to relicensing (Janneke Janssen)
  * User search in the Wagtail admin UI now works across multiple fields (Will Giddens)
  * `Page.last_published_at` is now a filterable field for search (Mikalai Radchuk)
+ * Page search results and usage listings now include navigation links (Matt Westcott)
  * Fix: "Open Link in New Tab" on a right arrow in page explorer should open page list (Emily Horsman)
  * Fix: Using `order_by_relevance=False` when searching with PostgreSQL now works (Mitchel Cabuloy)
  * Fix: Inline panel first and last sorting arrows correctly hidden in non-default tabs (Matt Westcott)
@@ -26,6 +34,8 @@ Changelog
  * Fix: Stop breadcrumb home icon from showing as ellipsis in Chrome 60 (Matt Westcott)
  * Fix: Prevent `USE_THOUSAND_SEPARATOR = True` from breaking the image focal point chooser (Sævar Öfjörð Magnússon)
  * Fix: Removed deprecated `SessionAuthenticationMiddleware` from project template (Samir Shah)
+ * Fix: Custom display page titles defined with `get_admin_display_title` are now shown in search results (Ben Sturmfels, Matt Westcott)
+ * Fix: Custom PageManagers now return the correct PageQuerySet subclass (Matt Westcott)
 
 
 1.12.2 (18.09.2017)
