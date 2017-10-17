@@ -13,9 +13,13 @@ What's new
 Other features
 ~~~~~~~~~~~~~~
 
+ * Added hidden field to the form builder (Ross Crawford-d'Heureuse)
+
 
 Bug fixes
 ~~~~~~~~~
+
+ * Do not remove stopwords when generating slugs from non-ASCII titles, to avoid issues with incorrect word boundaries (Sævar Öfjörð Magnússon)
 
 
 Upgrade considerations
