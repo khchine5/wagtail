@@ -20,12 +20,6 @@ from .test_backends import BackendTests
 class TestElasticsearch5SearchBackend(BackendTests, ElasticsearchCommonSearchBackendTests, TestCase):
     backend_path = 'wagtail.wagtailsearch.backends.elasticsearch5'
 
-    # TODO: we have to put [:100] on the end of the query due to issue #3431
-    def test_search_all(self):
-        # Searches on None should return everything in the index
-        results = self.backend.search(None, models.Book)[:100]
-        self.assertSetEqual(set(results), set(models.Book.objects.all()))
-
     # Broken
     @unittest.expectedFailure
     def test_filter_isnull_true(self):
@@ -394,11 +388,12 @@ class TestElasticsearch5SearchResults(TestCase):
         list(results)  # Performs search
 
         search.assert_any_call(
-            from_=0,
             body={'query': 'QUERY'},
             _source=False,
             stored_fields='pk',
-            index='wagtail__searchtests_book'
+            index='wagtail__searchtests_book',
+            scroll='2m',
+            size=100
         )
 
     @mock.patch('elasticsearch.Elasticsearch.search')
