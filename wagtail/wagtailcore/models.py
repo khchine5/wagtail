@@ -3,6 +3,8 @@ from __future__ import absolute_import, unicode_literals
 import json
 import logging
 from collections import defaultdict
+from io import StringIO
+from urllib.parse import urlparse
 
 from django.conf import settings
 from django.contrib.auth.models import Group, Permission
@@ -12,17 +14,15 @@ from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.handlers.base import BaseHandler
 from django.core.handlers.wsgi import WSGIRequest
-from django.core.urlresolvers import reverse
 from django.db import connection, models, transaction
 from django.db.models import Q, Value
 from django.db.models.functions import Concat, Substr
 from django.http import Http404
 from django.template.response import TemplateResponse
+from django.urls import reverse
 # Must be imported from Django so we get the new implementation of with_metaclass
 from django.utils import six, timezone
 from django.utils.functional import cached_property
-from django.utils.six import StringIO
-from django.utils.six.moves.urllib.parse import urlparse
 from django.utils.text import capfirst, slugify
 from django.utils.translation import ugettext_lazy as _
 from modelcluster.models import ClusterableModel, get_all_child_relations
@@ -348,6 +348,9 @@ class Page(six.with_metaclass(PageBase, AbstractPage, index.Indexed, Clusterable
     # Do not allow plain Page instances to be created through the Wagtail admin
     is_creatable = False
 
+    # An array of additional field names that will not be included when a Page is copied.
+    exclude_fields_in_copy = []
+
     # Define these attributes early to avoid masking errors. (Issue #3078)
     # The canonical definition is in wagtailadmin.edit_handlers.
     content_panels = []
@@ -510,7 +513,7 @@ class Page(six.with_metaclass(PageBase, AbstractPage, index.Indexed, Clusterable
 
         for field in cls._meta.fields:
             if isinstance(field, models.ForeignKey) and field.name not in field_exceptions:
-                if field.rel.on_delete == models.CASCADE:
+                if field.remote_field.on_delete == models.CASCADE:
                     errors.append(
                         checks.Warning(
                             "Field hasn't specified on_delete action",
@@ -1031,8 +1034,9 @@ class Page(six.with_metaclass(PageBase, AbstractPage, index.Indexed, Clusterable
 
     def copy(self, recursive=False, to=None, update_attrs=None, copy_revisions=True, keep_live=True, user=None):
         # Fill dict with self.specific values
-        exclude_fields = ['id', 'path', 'depth', 'numchild', 'url_path', 'path']
         specific_self = self.specific
+        default_exclude_fields = ['id', 'path', 'depth', 'numchild', 'url_path', 'path']
+        exclude_fields = default_exclude_fields + specific_self.exclude_fields_in_copy
         specific_dict = {}
 
         for field in specific_self._meta.get_fields():
@@ -1050,7 +1054,7 @@ class Page(six.with_metaclass(PageBase, AbstractPage, index.Indexed, Clusterable
                 continue
 
             # Ignore parent links (page_ptr)
-            if isinstance(field, models.OneToOneField) and field.rel.parent_link:
+            if isinstance(field, models.OneToOneField) and field.remote_field.parent_link:
                 continue
 
             specific_dict[field.name] = getattr(specific_self, field.name)
@@ -1518,7 +1522,7 @@ class PageRevision(models.Model):
         return self.get_next_by_created_at(page=self.page)
 
     def __str__(self):
-        return '"' + six.text_type(self.page) + '" at ' + six.text_type(self.created_at)
+        return '"' + str(self.page) + '" at ' + str(self.created_at)
 
     class Meta:
         verbose_name = _('page revision')

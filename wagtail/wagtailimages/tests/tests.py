@@ -6,8 +6,8 @@ import unittest
 from django import forms, template
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from django.utils import six
 from mock import MagicMock
 from taggit.forms import TagField, TagWidget
@@ -276,7 +276,7 @@ class TestFrontendServeView(TestCase):
         signature = generate_signature(self.image.id, 'fill-800x600')
         response = self.client.get(reverse('wagtailimages_serve_action_redirect', args=(signature, self.image.id, 'fill-800x600')))
 
-        expected_redirect_url = 'http://testserver/media/images/{filename[0]}.2e16d0ba.fill-800x600{filename[1]}'.format(
+        expected_redirect_url = '/media/images/{filename[0]}.2e16d0ba.fill-800x600{filename[1]}'.format(
             filename=os.path.splitext(os.path.basename(self.image.file.path))
         )
 
