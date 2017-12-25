@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 from django.apps import apps
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -9,7 +7,7 @@ from django.db.models import CASCADE, ForeignKey, Model, TextField
 from django.db.models.functions import Cast
 from django.utils.translation import ugettext_lazy as _
 
-from ...wagtailsearch.index import class_is_indexed
+from wagtail.search.index import class_is_indexed
 from .utils import get_descendants_content_types_pks
 
 
@@ -52,7 +50,7 @@ class IndexEntry(Model):
         unique_together = ('content_type', 'object_id')
         verbose_name = _('index entry')
         verbose_name_plural = _('index entries')
-        indexes = [GinIndex(['body_search'])]
+        indexes = [GinIndex(fields=['body_search'])]
 
     def __str__(self):
         return '%s: %s' % (self.content_type.name, self.content_object)
