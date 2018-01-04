@@ -36,6 +36,9 @@ Other features
  * Added ``render_landing_page`` method to ``AbstractForm`` to be easily overridden and pass ``form_submission`` to landing page context (Stein Strindhaug)
  * Added ``heading`` kwarg to ``InlinePanel`` to allow heading to be set independently of button label (Adrian Turjak)
  * The value type returned from a ``StructBlock`` can now be customised. See :ref:`custom_value_class_for_structblock` (LB (Ben Johnston))
+ * Added ``bgcolor`` image operation (Karl Hobley)
+ * Added ``WAGTAILADMIN_USER_LOGIN_FORM`` setting for overriding the admin login form (Mike Dingjan)
+ * Snippets now support custom primary keys (Sævar Öfjörð Magnússon)
 
 Bug fixes
 ~~~~~~~~~
@@ -63,6 +66,9 @@ Bug fixes
  * Prevented intermittent failures on Postgres search backend when a field is defined as both a ``SearchField`` and a ``FilterField`` (Matt Westcott)
  * Alt text of images in rich text is no longer truncated on double-quote characters (Matt Westcott)
  * Ampersands in embed URLs within rich text are no longer double-escaped (Matt Westcott)
+ * Using RGBA images no longer crashes with Pillow >= 4.2.0 (Karl Hobley)
+ * Copying a page with PostgreSQL search enabled no longer crashes (Bertrand Bordage)
+ * Style of the page unlock button was broken (Bertrand Bordage)
 
 
 Upgrade considerations
@@ -163,3 +169,14 @@ legacy versions of the API until everyone has migrated to an officially supporte
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``generate_signature`` function in ``wagtail.images.views.serve``, used to build URLs for the :ref:`dynamic image serve view <using_images_outside_wagtail>`, now returns a string rather than a binary string. This ensures that any existing user code that builds up the final image URL with ``reverse`` will continue to work on Django 2.0 (which no longer allows binary strings to be passed to ``reverse``). Any code that expects a binary string as the return value of ``generate_string`` - for example, calling ``decode()`` on the result - will need to be updated. (Apps that need to preserve compatibility with earlier versions of Wagtail can call ``django.utils.encoding.force_text`` instead of ``decode``.)
+
+
+Deprecated search view
+~~~~~~~~~~~~~~~~~~~~~~
+
+Wagtail has always included a bundled view for frontend search. However, this view isn't easy to customise so
+defining this view per project is usually preferred. If you have used this bundled view (check for an import
+from  ``wagtail.wagtailsearch.urls`` in your project's ``urls.py``), you will need to replace this with your
+own implementation.
+
+See the search view in Wagtail demo for a guide: https://github.com/wagtail/wagtaildemo/blob/master/demo/views.py
