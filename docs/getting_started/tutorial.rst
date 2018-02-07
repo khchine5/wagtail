@@ -82,7 +82,7 @@ Edit ``home/models.py`` as follows, to add a ``body`` field to the model:
         ]
 
 ``body`` is defined as ``RichTextField``, a special Wagtail field. You
-can use any of the `Django core fields <https://docs.djangoproject.com/en/1.8/ref/models/fields/>`__. ``content_panels`` define the
+can use any of the `Django core fields <https://docs.djangoproject.com/en/1.11/ref/models/fields/>`__. ``content_panels`` define the
 capabilities and the layout of the editing interface. :doc:`More on creating Page models. <../topics/pages>`
 
 Run ``python manage.py makemigrations``, then
@@ -97,7 +97,7 @@ to the model. Wagtail uses normal Django templates to render each page
 type. By default, it will look for a template filename formed from the app and model name,
 separating capital letters with underscores (e.g. HomePage within the 'home' app becomes
 ``home/home_page.html``). This template file can exist in any location recognised by
-`Django's template rules <https://docs.djangoproject.com/en/1.10/intro/tutorial03/#write-views-that-actually-do-something>`__; conventionally it is placed under a ``templates`` folder within the app.
+`Django's template rules <https://docs.djangoproject.com/en/1.11/intro/tutorial03/#write-views-that-actually-do-something>`__; conventionally it is placed under a ``templates`` folder within the app.
 
 Edit ``home/templates/home/home_page.html`` to contain the following:
 
@@ -376,7 +376,7 @@ model like this:
 
         def get_context(self, request):
             # Update context to include only published posts, ordered by reverse-chron
-            context = super(BlogIndexPage, self).get_context(request)
+            context = super().get_context(request)
             blogpages = self.get_children().live().order_by('-first_published_at')
             context['blogpages'] = blogpages
             return context
@@ -649,7 +649,7 @@ will get you a 404, since we haven't yet defined a "tags" view. Add to ``models.
             blogpages = BlogPage.objects.filter(tags__name=tag)
 
             # Update template context
-            context = super(BlogTagIndexPage, self).get_context(request)
+            context = super().get_context(request)
             context['blogpages'] = blogpages
             return context
 

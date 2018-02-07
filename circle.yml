@@ -1,6 +1,8 @@
 machine:
   python:
     version: 3.6.1
+  node:
+    version: 8.9.3
 
 dependencies:
   pre:
@@ -9,7 +11,7 @@ dependencies:
 test:
   override:
     - flake8 wagtail
-#    - isort --check-only --diff --recursive wagtail
+    - isort --check-only --diff --recursive wagtail
     - npm run lint:js
     - npm run lint:css
     - python -u runtests.py

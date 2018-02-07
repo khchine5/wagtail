@@ -1,0 +1,25 @@
+==========================================
+Wagtail 2.1 release notes - IN DEVELOPMENT
+==========================================
+
+.. contents::
+    :local:
+    :depth: 1
+
+
+What's new
+==========
+
+
+Other features
+~~~~~~~~~~~~~~
+
+
+Bug fixes
+~~~~~~~~~
+
+ * Status button on 'edit page' now links to the correct URL when live and draft slug differ (LB (Ben Johnston))
+
+
+Upgrade considerations
+======================

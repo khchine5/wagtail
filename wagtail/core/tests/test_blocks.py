@@ -446,7 +446,7 @@ class TestRichTextBlock(TestCase):
         render_form should produce the editor-specific rendition of the rich text value
         (which includes e.g. 'data-linktype' attributes on <a> elements)
         """
-        block = blocks.RichTextBlock()
+        block = blocks.RichTextBlock(editor='hallo')
         value = RichText('<p>Merry <a linktype="page" id="4">Christmas</a>!</p>')
         result = block.render_form(value, prefix='richtext')
         self.assertIn(
@@ -3143,3 +3143,19 @@ class TestIncludeBlockTag(TestCase):
             'language': 'fr',
         })
         self.assertIn('<body><h1 class="important">bonjour</h1></body>', result)
+
+
+class BlockUsingGetTemplateMethod(blocks.Block):
+
+    my_new_template = "my_super_awesome_dynamic_template.html"
+
+    def get_template(self):
+        return self.my_new_template
+
+
+class TestOverriddenGetTemplateBlockTag(TestCase):
+    def test_template_is_overriden_by_get_template(self):
+
+        block = BlockUsingGetTemplateMethod(template='tests/blocks/this_shouldnt_be_used.html')
+        template = block.get_template()
+        self.assertEquals(template, block.my_new_template)

@@ -1,11 +1,21 @@
 Changelog
 =========
 
+2.1 (xx.xx.xxxx) - IN DEVELOPMENT
+~~~~~~~~~~~~~~~~
+
+ * Fix: Status button on 'edit page' now links to the correct URL when live and draft slug differ (LB (Ben Johnston))
+
+
 2.0 (xx.xx.xxxx) - IN DEVELOPMENT
 ~~~~~~~~~~~~~~~~
 
+ * Added support for Django 2.0 (Matt Westcott, Karl Hobley, LB (Ben Johnston), Mads Jensen)
+ * Reorganised module paths (Karl Hobley, Matt Westcott)
+ * Replaced the hallo.js rich text editor with Draftail (Thibaud Colas, Loïc Teixeira, Matt Westcott)
  * Removed support for Python 2.7, Django 1.8 and Django 1.10
  * Removed support for Elasticsearch 1.x
+ * Added the ability to schedule updates to existing published pages (Patrick Woods)
  * Moved Wagtail API v1 implementation (`wagtail.contrib.api`) to an external app (https://github.com/wagtail/wagtailapi_legacy) (Karl Hobley)
  * The page chooser now searches all fields of a page, instead of just the title (Bertrand Bordage)
  * Implement ordering by date in form submission view (LB (Ben Johnston))
@@ -26,6 +36,19 @@ Changelog
  * Added `bgcolor` image operation (Karl Hobley)
  * Added `WAGTAILADMIN_USER_LOGIN_FORM` setting for overriding the admin login form (Mike Dingjan)
  * Snippets now support custom primary keys (Sævar Öfjörð Magnússon)
+ * Upgraded jQuery to version 3.2.1 (Janneke Janssen)
+ * Updated documentation styling (LB (Ben Johnston))
+ * Rich text fields now take feature lists into account when whitelisting HTML elements (Matt Westcott)
+ * FormPage lists and Form submission lists in admin now use class based views for easy overriding (Johan Arensman)
+ * Form submission csv exports now have the export date in the filename and can be customized (Johan Arensman)
+ * FormBuilder class now uses bound methods for field generation, adding custom fields is now easier and documented (LB (Ben) Johnston)
+ * Added `WAGTAILADMIN_NOTIFICATION_INCLUDE_SUPERUSERS` setting to determine whether superusers are included in moderation email notifications (Bruno Alla)
+ * Added a basic Dockerfile to the project template (Tom Dyson)
+ * StreamField blocks now allow custom `get_template` methods for overriding templates in instances (Christopher Bledsoe)
+ * Simplified edit handler API (Florent Osmont, Bertrand Bordage)
+ * Made 'add/change/delete collection' permissions configurable from the group edit page (Matt Westcott)
+ * Update autoprefixer configuration to better match browser support targets (Janneke Janssen)
+ * Update React and related dependencies to latest versions (Janneke Janssen, Hugo van den Berg)
  * Fix: Do not remove stopwords when generating slugs from non-ASCII titles, to avoid issues with incorrect word boundaries (Sævar Öfjörð Magnússon)
  * Fix: The PostgreSQL search backend now preserves ordering of the `QuerySet` when searching with `order_by_relevance=False` (Bertrand Bordage)
  * Fix: Using `modeladmin_register` as a decorator no longer replaces the decorated class with `None` (Tim Heap)
@@ -51,6 +74,10 @@ Changelog
  * Fix: Using RGBA images no longer crashes with Pillow >= 4.2.0 (Karl Hobley)
  * Fix: Copying a page with PostgreSQL search enabled no longer crashes (Bertrand Bordage)
  * Fix: Style of the page unlock button was broken (Bertrand Bordage)
+ * Fix: Admin search no longer floods browser history (Bertrand Bordage)
+ * Fix: Version comparison now handles custom primary keys on inline models correctly (LB (Ben Johnston))
+ * Fix: Fixed error when inserting chooser panels into FieldRowPanel (Florent Osmont, Bertrand Bordage)
+ * Fix: Reinstated missing error reporting on image upload (Matt Westcott)
 
 
 1.13.1 (17.11.2017)

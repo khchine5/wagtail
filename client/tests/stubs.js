@@ -20,14 +20,21 @@ global.wagtailConfig = {
   },
   STRINGS: {
     EDIT: 'Edit',
+    DELETE: 'Delete',
     PAGE: 'Page',
     PAGES: 'Pages',
-    LOADING: 'Loading...',
-    SERVER_ERROR: 'Server Error',
+    LOADING: 'Loading…',
     NO_RESULTS: 'No results',
+    SERVER_ERROR: 'Server Error',
     SEE_CHILDREN: 'See children',
     SEE_ALL: 'See all',
     CLOSE_EXPLORER: 'Close explorer',
+    ALT_TEXT: 'Alt text',
+    WRITE_HERE: 'Write here…',
+    HORIZONTAL_LINE: 'Horizontal line',
+    LINE_BREAK: 'Line break',
+    UNDO: 'Undo',
+    REDO: 'Redo',
   },
 };
 

@@ -1,13 +1,12 @@
 import json
 from collections import OrderedDict
 
-from django.conf import settings
 from django.forms import Media, widgets
-from django.utils.module_loading import import_string
 
-from wagtail.utils.widgets import WidgetWithScript
 from wagtail.admin.edit_handlers import RichTextFieldPanel
-from wagtail.core.rich_text import DbWhitelister, expand_db_html, features
+from wagtail.admin.rich_text.converters.editor_html import EditorHTMLConverter
+from wagtail.core.rich_text import features
+from wagtail.utils.widgets import WidgetWithScript
 
 
 class HalloPlugin:
@@ -91,6 +90,8 @@ class HalloRichTextArea(WidgetWithScript, widgets.Textarea):
         if self.features is None:
             self.features = features.get_default_features()
 
+        self.converter = EditorHTMLConverter(self.features)
+
         # construct a list of plugin objects, by querying the feature registry
         # and keeping the non-null responses from get_editor_plugin
         self.plugins = CORE_HALLO_PLUGINS + list(filter(None, [
@@ -105,7 +106,7 @@ class HalloRichTextArea(WidgetWithScript, widgets.Textarea):
         if value is None:
             translated_value = None
         else:
-            translated_value = expand_db_html(value, for_editor=True)
+            translated_value = self.converter.from_database_format(value)
         return super().render(name, translated_value, attrs)
 
     def render_js_init(self, id_, name, value):
@@ -125,46 +126,18 @@ class HalloRichTextArea(WidgetWithScript, widgets.Textarea):
         original_value = super().value_from_datadict(data, files, name)
         if original_value is None:
             return None
-        return DbWhitelister.clean(original_value)
+        return self.converter.to_database_format(original_value)
 
     @property
     def media(self):
         media = Media(js=[
             'wagtailadmin/js/vendor/hallo.js',
             'wagtailadmin/js/hallo-bootstrap.js',
-        ])
+        ], css={
+            'all': ['wagtailadmin/css/panels/hallo.css']
+        })
 
         for plugin in self.plugins:
             media += plugin.media
 
         return media
-
-
-DEFAULT_RICH_TEXT_EDITORS = {
-    'default': {
-        'WIDGET': 'wagtail.admin.rich_text.HalloRichTextArea'
-    }
-}
-
-
-def get_rich_text_editor_widget(name='default', features=None):
-    editor_settings = getattr(settings, 'WAGTAILADMIN_RICH_TEXT_EDITORS', DEFAULT_RICH_TEXT_EDITORS)
-
-    editor = editor_settings[name]
-    options = editor.get('OPTIONS', None)
-
-    if features is None and options is not None:
-        # fall back on 'features' list within OPTIONS, if any
-        features = options.get('features', None)
-
-    cls = import_string(editor['WIDGET'])
-
-    kwargs = {}
-
-    if options is not None:
-        kwargs['options'] = options
-
-    if getattr(cls, 'accepts_features', False):
-        kwargs['features'] = features
-
-    return cls(**kwargs)
