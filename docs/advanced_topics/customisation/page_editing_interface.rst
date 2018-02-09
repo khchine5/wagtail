@@ -88,101 +88,23 @@ The feature identifiers provided on a default Wagtail installation are as follow
 
 Adding new features to this list is generally a two step process:
 
- * Create a plugin that extends the editor with a new toolbar button for adding a particular HTML element
- * Add that HTML element to the whitelist of elements that are permitted in rich text output
+ * Create a plugin that extends the editor with a new toolbar button or other control(s) to manage the rich text formatting of the feature.
+ * Create conversion or whitelist rules to define how content from the editor should be filtered or transformed before storage, and front-end HTML output.
 
 Both of these steps are performed through the ``register_rich_text_features`` hook (see :ref:`admin_hooks`). The hook function is triggered on startup, and receives a *feature registry* object as its argument; this object keeps track of the behaviours associated with each feature identifier.
-
-This process for adding new features is described in the following sections.
-
-
-.. _extending_wysiwyg:
-
-Extending the WYSIWYG Editor (``hallo.js``)
-+++++++++++++++++++++++++++++++++++++++++++
-
-.. note::
-  The customisations described here are only available on the hallo.js rich text editor used on Wagtail 1.x. To use hallo.js on Wagtail 2.x, add the following to your settings:
-
-  .. code-block:: python
-
-    WAGTAILADMIN_RICH_TEXT_EDITORS = {
-        'default': {
-            'WIDGET': 'wagtail.admin.rich_text.HalloRichTextArea'
-        }
-    }
-
-
-Wagtail's rich text editor is built on ``hallo.js``, and its functionality can be extended through plugins. For information on developing custom ``hallo.js`` plugins, see the project's page: https://github.com/bergie/hallo
-
-Once the plugin has been created, it should be registered through the feature registry's ``register_editor_plugin(editor, feature_name, plugin)`` method. For a ``hallo.js`` plugin, the ``editor`` parameter should always be ``'hallo'``.
-
-A plugin ``halloblockquote``, implemented in ``myapp/js/hallo-blockquote.js``, that adds support for the ``<blockquote>`` tag, would be registered under the feature name ``block-quote`` as follows:
-
-.. code-block:: python
-
-    from wagtail.admin.rich_text import HalloPlugin
-    from wagtail.core import hooks
-
-    @hooks.register('register_rich_text_features')
-    def register_embed_feature(features):
-        features.register_editor_plugin(
-            'hallo', 'block-quote',
-            HalloPlugin(
-                name='halloblockquote',
-                js=['myapp/js/hallo-blockquote.js'],
-            )
-        )
-
-The constructor for ``HalloPlugin`` accepts the following keyword arguments:
-
- * ``name`` - the plugin name as defined in the Javascript code. ``hallo.js`` plugin names are prefixed with the ``"IKS."`` namespace, but the name passed here should be without the prefix.
- * ``options`` - a dictionary (or other JSON-serialisable object) of options to be passed to the Javascript plugin code on initialisation
- * ``js`` - a list of Javascript files to be imported for this plugin, defined in the same way as a `Django form media <https://docs.djangoproject.com/en/1.11/topics/forms/media/>`_ definition
- * ``css`` - a dictionary of CSS files to be imported for this plugin, defined in the same way as a `Django form media <https://docs.djangoproject.com/en/1.11/topics/forms/media/>`_ definition
- * ``order`` - an index number (default 100) specifying the order in which plugins should be listed, which in turn determines the order buttons will appear in the toolbar
 
 To have a feature active by default (i.e. on ``RichTextFields`` that do not define an explicit ``features`` list), add it to the ``default_features`` list on the ``features`` object:
 
 .. code-block:: python
 
-    from django.utils.html import format_html
-
     @hooks.register('register_rich_text_features')
     def register_blockquote_feature(features):
-        features.register_editor_plugin(
-            'hallo', 'block-quote',
-            # ...
-        )
-        features.default_features.append('block-quote')
+        features.default_features.append('h6')
 
+The process for creating new features is described in the following pages:
 
-.. _whitelisting_rich_text_elements:
-
-Whitelisting rich text elements
-+++++++++++++++++++++++++++++++
-
-After extending the editor to support a new HTML element, you'll need to add it to the whitelist of permitted elements - Wagtail's standard behaviour is to strip out unrecognised elements, to prevent editors from inserting styles and scripts (either deliberately, or inadvertently through copy-and-paste) that the developer didn't account for.
-
-Elements can be added to the whitelist through the feature registry's ``register_converter_rule(converter, feature_name, ruleset)`` method. When the ``hallo.js`` editor is in use, the ``converter`` parameter should always be ``'editorhtml'``.
-
-The following code will add the ``<blockquote>`` element to the whitelist whenever the ``block-quote`` feature is active:
-
-.. code-block:: python
-
-    from wagtail.admin.rich_text.converters.editor_html import WhitelistRule
-    from wagtail.core.whitelist import allow_without_attributes
-
-    @hooks.register('register_rich_text_features')
-    def register_blockquote_feature(features):
-        features.register_converter_rule('editorhtml', 'block-quote', [
-            WhitelistRule('blockquote', allow_without_attributes),
-        ])
-
-``WhitelistRule`` is passed the element name, and a callable which will perform some kind of manipulation of the element whenever it is encountered. This callable receives the element as a `BeautifulSoup <http://www.crummy.com/software/BeautifulSoup/bs4/doc/>`_ Tag object.
-
-The ``wagtail.core.whitelist`` module provides a few helper functions to assist in defining these handlers: ``allow_without_attributes``, a handler which preserves the element but strips out all of its attributes, and ``attribute_rule`` which accepts a dict specifying how to handle each attribute, and returns a handler function. This dict will map attribute names to either True (indicating that the attribute should be kept), False (indicating that it should be dropped), or a callable (which takes the initial attribute value and returns either a final value for the attribute, or None to drop the attribute).
-
+* :doc:`./extending_draftail`
+* :doc:`./extending_hallo`
 
 .. _rich_text_image_formats:
 

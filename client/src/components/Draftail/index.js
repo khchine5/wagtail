@@ -6,17 +6,30 @@ import { IS_IE11, STRINGS } from '../../config/wagtailConfig';
 
 import Icon from '../Icon/Icon';
 
-import Link from './decorators/Link';
-import Document from './decorators/Document';
-import ImageBlock from './blocks/ImageBlock';
-import EmbedBlock from './blocks/EmbedBlock';
+export { default as Link } from './decorators/Link';
+export { default as Document } from './decorators/Document';
+export { default as ImageBlock } from './blocks/ImageBlock';
+export { default as EmbedBlock } from './blocks/EmbedBlock';
 
-import ModalWorkflowSource from './sources/ModalWorkflowSource';
+export { default as ModalWorkflowSource } from './sources/ModalWorkflowSource';
 
-import registry from './registry';
+/**
+ * Registry for client-side code of Draftail plugins.
+ */
+const PLUGINS = {};
 
-const wrapWagtailIcon = type => {
-  if (type.icon) {
+const registerPlugin = (plugin) => {
+  PLUGINS[plugin.type] = plugin;
+  return PLUGINS;
+};
+
+/**
+ * Wraps a style/block/entity type’s icon with an icon font implementation,
+ * so Draftail can use icon fonts in its toolbar.
+ */
+export const wrapWagtailIcon = type => {
+  const isIconFont = type.icon && typeof type.icon === 'string';
+  if (isIconFont) {
     return Object.assign(type, {
       icon: <Icon name={type.icon} />,
     });
@@ -25,7 +38,12 @@ const wrapWagtailIcon = type => {
   return type;
 };
 
-export const initEditor = (fieldName, options = {}) => {
+/**
+ * Initialises the DraftailEditor for a given field.
+ * @param {string} fieldName
+ * @param {Object} options
+ */
+const initEditor = (fieldName, options) => {
   const field = document.querySelector(`[name="${fieldName}"]`);
   const editorWrapper = document.createElement('div');
   field.parentNode.appendChild(editorWrapper);
@@ -34,30 +52,18 @@ export const initEditor = (fieldName, options = {}) => {
     field.value = JSON.stringify(rawContentState);
   };
 
-  let blockTypes;
-  let inlineStyles;
-  let entityTypes;
+  const blockTypes = options.blockTypes || [];
+  const inlineStyles = options.inlineStyles || [];
+  let entityTypes = options.entityTypes || [];
 
-  if (options && options.blockTypes) {
-    blockTypes = options.blockTypes.map(wrapWagtailIcon);
-  }
+  entityTypes = entityTypes.map(wrapWagtailIcon).map((type) => {
+    const plugin = PLUGINS[type.type];
 
-  if (options && options.inlineStyles) {
-    inlineStyles = options.inlineStyles.map(wrapWagtailIcon);
-  }
+    // Override the properties defined in the JS plugin: Python should be the source of truth.
+    return Object.assign({}, plugin, type);
+  });
 
-  if (options && options.entityTypes) {
-    entityTypes = options.entityTypes.map(wrapWagtailIcon).map(type =>
-      Object.assign(type, {
-        source: registry.getSource(type.source),
-        strategy: registry.getStrategy(type.type) || null,
-        decorator: registry.getDecorator(type.decorator),
-        block: registry.getBlock(type.block),
-      })
-    );
-  }
-
-  const enableHorizontalRule = options && options.enableHorizontalRule ? {
+  const enableHorizontalRule = options.enableHorizontalRule ? {
     description: STRINGS.HORIZONTAL_LINE,
   } : false;
 
@@ -72,13 +78,12 @@ export const initEditor = (fieldName, options = {}) => {
       enableLineBreak={{ description: STRINGS.LINE_BREAK }}
       showUndoControl={{ description: STRINGS.UNDO }}
       showRedoControl={{ description: STRINGS.REDO }}
-      // If increasing above 4, we will need to add styles for the extra nesting levels.
       maxListNesting={4}
       // Draft.js + IE 11 presents some issues with pasting rich text. Disable rich paste there.
       stripPastedStyles={IS_IE11}
       {...options}
-      blockTypes={blockTypes}
-      inlineStyles={inlineStyles}
+      blockTypes={blockTypes.map(wrapWagtailIcon)}
+      inlineStyles={inlineStyles.map(wrapWagtailIcon)}
       entityTypes={entityTypes}
       enableHorizontalRule={enableHorizontalRule}
     />
@@ -90,23 +95,7 @@ export const initEditor = (fieldName, options = {}) => {
   field.draftailEditor = draftailEditor;
 };
 
-registry.registerSources({
-  ModalWorkflowSource,
-});
-registry.registerDecorators({
-  Link,
-  Document,
-});
-registry.registerBlocks({
-  ImageBlock,
-  EmbedBlock,
-});
-
-const draftail = Object.assign(
-  {
-    initEditor,
-  },
-  registry
-);
-
-export default draftail;
+export default {
+  initEditor,
+  registerPlugin,
+};
