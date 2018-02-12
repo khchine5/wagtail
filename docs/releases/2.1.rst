@@ -19,7 +19,12 @@ Bug fixes
 ~~~~~~~~~
 
  * Status button on 'edit page' now links to the correct URL when live and draft slug differ (LB (Ben Johnston))
-
+ * Image title text in the gallery and in the chooser now wraps for long filenames (LB (Ben Johnston), Luiz Boaretto)
 
 Upgrade considerations
 ======================
+
+Image format ``image_to_html`` method has been updated
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The internal API for rich text image format objects (see :ref:`rich_text_image_formats`) has been updated; the ``Format.image_to_html`` method now receives the ``extra_attributes`` keyword argument as a dictionary of attributes, rather than a string. If you have defined any custom format objects that override this method, these will need to be updated.
