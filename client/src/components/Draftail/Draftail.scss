@@ -65,12 +65,13 @@ $draftail-editor-font-family: $font-serif;
     }
 }
 
-.Draftail-Toolbar {
-    display: inline-block;
-}
-
 .Draftail-Editor {
     border-radius: 0;
+
+    &__wrapper {
+        // Ensure elements within the editor are positioned according to this container.
+        position: relative;
+    }
 }
 
 // When in a .full container, the editor has a specific appearance

@@ -103,7 +103,13 @@ class InlineStyleElementHandler:
         self.style = style
 
     def handle_starttag(self, name, attrs, state, contentstate):
-        assert state.current_block is not None, "%s element found at the top level" % name
+        if state.current_block is None:
+            # Inline style element encountered at the top level -
+            # start a new paragraph block to contain it
+            block = Block('unstyled', depth=state.list_depth)
+            contentstate.blocks.append(block)
+            state.current_block = block
+            state.leading_whitespace = STRIP_WHITESPACE
 
         if state.leading_whitespace == FORCE_WHITESPACE:
             # any pending whitespace should be output before handling this tag,
@@ -131,7 +137,13 @@ class InlineEntityElementHandler:
         self.entity_type = entity_type
 
     def handle_starttag(self, name, attrs, state, contentstate):
-        assert state.current_block is not None, "%s element found at the top level" % name
+        if state.current_block is None:
+            # Inline entity element encountered at the top level -
+            # start a new paragraph block to contain it
+            block = Block('unstyled', depth=state.list_depth)
+            contentstate.blocks.append(block)
+            state.current_block = block
+            state.leading_whitespace = STRIP_WHITESPACE
 
         if state.leading_whitespace == FORCE_WHITESPACE:
             # any pending whitespace should be output before handling this tag,
@@ -215,11 +227,24 @@ class HorizontalRuleHandler(AtomicBlockEntityElementHandler):
         return Entity('HORIZONTAL_RULE', 'IMMUTABLE', {})
 
 
+class LineBreakHandler:
+    def handle_starttag(self, name, attrs, state, contentstate):
+        if state.current_block is None:
+            # ignore line breaks that exist at the top level
+            return
+
+        state.current_block.text += '\n'
+
+    def handle_endtag(self, name, state, contentstate):
+        pass
+
+
 class HtmlToContentStateHandler(HTMLParser):
     def __init__(self, features=()):
         self.paragraph_handler = BlockElementHandler('unstyled')
         self.element_handlers = HTMLRuleset({
-            'p': self.paragraph_handler
+            'p': self.paragraph_handler,
+            'br': LineBreakHandler(),
         })
         for feature in features:
             rule = feature_registry.get_converter_rule('contentstate', feature)

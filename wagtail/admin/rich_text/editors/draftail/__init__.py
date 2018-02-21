@@ -33,21 +33,27 @@ class DraftailRichTextArea(WidgetWithScript, widgets.HiddenInput):
 
         super().__init__(*args, **kwargs)
 
+    def translate_value(self, value):
+        # Convert database rich text representation to the format required by
+        # the input field
+
+        if value is None:
+            value = ''
+
+        return self.converter.from_database_format(value)
+
     def render(self, name, value, attrs=None):
         if attrs is None:
             attrs = {}
 
         attrs['data-draftail-input'] = True
 
-        if value is None:
-            value = ''
-
-        translated_value = self.converter.from_database_format(value)
+        translated_value = self.translate_value(value)
         return super().render(name, translated_value, attrs)
 
     def render_js_init(self, id_, name, value):
-        return "window.draftail.initEditor('{name}', {opts})".format(
-            name=name, opts=json.dumps(self.options))
+        return "window.draftail.initEditor('#{id}', {opts}, document.currentScript)".format(
+            id=id_, opts=json.dumps(self.options))
 
     def value_from_datadict(self, data, files, name):
         original_value = super().value_from_datadict(data, files, name)

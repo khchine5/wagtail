@@ -13,6 +13,9 @@ export { default as EmbedBlock } from './blocks/EmbedBlock';
 
 export { default as ModalWorkflowSource } from './sources/ModalWorkflowSource';
 
+// 1024x1024 SVG path rendering of the "↵" character, that renders badly in MS Edge.
+const BR_ICON = 'M.436 633.471l296.897-296.898v241.823h616.586V94.117h109.517v593.796H297.333v242.456z';
+
 /**
  * Registry for client-side code of Draftail plugins.
  */
@@ -40,12 +43,19 @@ export const wrapWagtailIcon = type => {
 
 /**
  * Initialises the DraftailEditor for a given field.
- * @param {string} fieldName
+ * @param {string} selector
  * @param {Object} options
+ * @param {Element} currentScript
  */
-const initEditor = (fieldName, options) => {
-  const field = document.querySelector(`[name="${fieldName}"]`);
+const initEditor = (selector, options, currentScript) => {
+  // document.currentScript is not available in IE11. Use a fallback instead.
+  const context = currentScript ? currentScript.parentNode : document.body;
+  const field = context.querySelector(selector);
+
   const editorWrapper = document.createElement('div');
+  editorWrapper.className = 'Draftail-Editor__wrapper';
+  editorWrapper.setAttribute('data-draftail-editor-wrapper', true);
+
   field.parentNode.appendChild(editorWrapper);
 
   const serialiseInputValue = rawContentState => {
@@ -75,7 +85,10 @@ const initEditor = (fieldName, options) => {
       onSave={serialiseInputValue}
       placeholder={STRINGS.WRITE_HERE}
       spellCheck={true}
-      enableLineBreak={{ description: STRINGS.LINE_BREAK }}
+      enableLineBreak={{
+        description: STRINGS.LINE_BREAK,
+        icon: BR_ICON,
+      }}
       showUndoControl={{ description: STRINGS.UNDO }}
       showRedoControl={{ description: STRINGS.REDO }}
       maxListNesting={4}
