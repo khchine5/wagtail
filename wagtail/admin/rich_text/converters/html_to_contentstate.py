@@ -20,10 +20,19 @@ class HandlerState:
         self.current_block = None
         self.current_inline_styles = []
         self.current_entity_ranges = []
+
         # what to do with leading whitespace on the next text node we encounter: strip, keep or force
         self.leading_whitespace = STRIP_WHITESPACE
         self.list_depth = 0
         self.list_item_type = None
+
+        # an atomic block which is NOT preceded by a non-atomic block must have a spacer
+        # paragraph inserted before it
+        # NB This is not included in pushed/popped state, because after a pop() this
+        # should still indicate the status of the most recent block, not the one preceding
+        # the corresponding push()
+        self.has_preceding_nonatomic_block = False
+
         self.pushed_states = []
 
     def push(self):
@@ -33,7 +42,7 @@ class HandlerState:
             'current_entity_ranges': self.current_entity_ranges,
             'leading_whitespace': self.leading_whitespace,
             'list_depth': self.list_depth,
-            'list_item_type': self.list_item_type
+            'list_item_type': self.list_item_type,
         })
 
     def pop(self):
@@ -44,6 +53,19 @@ class HandlerState:
         self.leading_whitespace = last_state['leading_whitespace']
         self.list_depth = last_state['list_depth']
         self.list_item_type = last_state['list_item_type']
+
+
+def add_paragraph_block(state, contentstate):
+    """
+    Utility function for adding an unstyled (paragraph) block to contentstate;
+    useful for element handlers that aren't paragraph elements themselves, but need
+    to insert paragraphs to ensure correctness
+    """
+    block = Block('unstyled', depth=state.list_depth)
+    contentstate.blocks.append(block)
+    state.current_block = block
+    state.leading_whitespace = STRIP_WHITESPACE
+    state.has_preceding_nonatomic_block = True
 
 
 class ListElementHandler:
@@ -80,6 +102,7 @@ class BlockElementHandler:
         contentstate.blocks.append(block)
         state.current_block = block
         state.leading_whitespace = STRIP_WHITESPACE
+        state.has_preceding_nonatomic_block = True
 
     def handle_endtag(self, name, state, contentState):
         assert not state.current_inline_styles, "End of block reached without closing inline style elements"
@@ -106,10 +129,7 @@ class InlineStyleElementHandler:
         if state.current_block is None:
             # Inline style element encountered at the top level -
             # start a new paragraph block to contain it
-            block = Block('unstyled', depth=state.list_depth)
-            contentstate.blocks.append(block)
-            state.current_block = block
-            state.leading_whitespace = STRIP_WHITESPACE
+            add_paragraph_block(state, contentstate)
 
         if state.leading_whitespace == FORCE_WHITESPACE:
             # any pending whitespace should be output before handling this tag,
@@ -140,10 +160,7 @@ class InlineEntityElementHandler:
         if state.current_block is None:
             # Inline entity element encountered at the top level -
             # start a new paragraph block to contain it
-            block = Block('unstyled', depth=state.list_depth)
-            contentstate.blocks.append(block)
-            state.current_block = block
-            state.leading_whitespace = STRIP_WHITESPACE
+            add_paragraph_block(state, contentstate)
 
         if state.leading_whitespace == FORCE_WHITESPACE:
             # any pending whitespace should be output before handling this tag,
@@ -206,6 +223,11 @@ class AtomicBlockEntityElementHandler:
         # forcibly close any block that illegally contains this one
         state.current_block = None
 
+        if not state.has_preceding_nonatomic_block:
+            # if this block is NOT preceded by a non-atomic block,
+            # need to insert a spacer paragraph
+            add_paragraph_block(state, contentstate)
+
         attr_dict = dict(attrs)  # convert attrs from list of (name, value) tuples to a dict
         entity = self.create_entity(name, attr_dict, state, contentstate)
         key = contentstate.add_entity(entity)
@@ -217,6 +239,7 @@ class AtomicBlockEntityElementHandler:
         entity_range.offset = 0
         entity_range.length = 1
         block.entity_ranges.append(entity_range)
+        state.has_preceding_nonatomic_block = False
 
     def handle_endtag(self, name, state, contentstate):
         pass
@@ -251,7 +274,7 @@ class HtmlToContentStateHandler(HTMLParser):
             if rule is not None:
                 self.element_handlers.add_rules(rule['from_database_format'])
 
-        super().__init__()
+        super().__init__(convert_charrefs=True)
 
     def reset(self):
         self.state = HandlerState()
@@ -261,11 +284,6 @@ class HtmlToContentStateHandler(HTMLParser):
         self.open_elements = []
 
         super().reset()
-
-    def add_block(self, block):
-        self.contentstate.blocks.append(block)
-        self.state.current_block = block
-        self.state.leading_whitespace = STRIP_WHITESPACE
 
     def handle_starttag(self, name, attrs):
         attr_dict = dict(attrs)  # convert attrs from list of (name, value) tuples to a dict
@@ -296,7 +314,7 @@ class HtmlToContentStateHandler(HTMLParser):
                 return
             else:
                 # create a new paragraph block for this content
-                self.add_block(Block('unstyled', depth=self.state.list_depth))
+                add_paragraph_block(self.state, self.contentstate)
 
         if content == ' ':
             # if leading_whitespace = strip, this whitespace node is not significant
@@ -325,3 +343,9 @@ class HtmlToContentStateHandler(HTMLParser):
                 self.state.leading_whitespace = KEEP_WHITESPACE
 
             self.state.current_block.text += content
+
+    def close(self):
+        # if content ends in an atomic block (or is empty), need to append a spacer paragraph
+        if not self.state.has_preceding_nonatomic_block:
+            add_paragraph_block(self.state, self.contentstate)
+        super().close()

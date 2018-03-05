@@ -404,6 +404,68 @@ class TestHtmlToContentState(TestCase):
             }
         })
 
+    def test_add_spacer_paragraph_between_image_embeds(self):
+        converter = ContentstateConverter(features=['image'])
+        result = json.loads(converter.from_database_format(
+            '''
+            <embed embedtype="image" alt="an image" id="1" format="left" />
+            <embed embedtype="image" alt="an image" id="1" format="left" />
+            '''
+        ))
+        self.assertContentStateEqual(result, {
+            'blocks': [
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 0, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 1, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+            ],
+            'entityMap': {
+                '0': {
+                    'data': {'format': 'left', 'alt': 'an image', 'id': '1', 'src': '/media/not-found'},
+                    'mutability': 'IMMUTABLE', 'type': 'IMAGE'
+                },
+                '1': {
+                    'data': {'format': 'left', 'alt': 'an image', 'id': '1', 'src': '/media/not-found'},
+                    'mutability': 'IMMUTABLE', 'type': 'IMAGE'
+                },
+            }
+        })
+
+    def test_image_after_list(self):
+        """
+        There should be no spacer paragraph inserted between a list and an image
+        """
+        converter = ContentstateConverter(features=['ul', 'image'])
+        result = json.loads(converter.from_database_format(
+            '''
+            <ul>
+                <li>Milk</li>
+                <li>Eggs</li>
+            </ul>
+            <embed embedtype="image" alt="an image" id="1" format="left" />
+            <ul>
+                <li>More milk</li>
+                <li>More eggs</li>
+            </ul>
+            '''
+        ))
+        self.assertContentStateEqual(result, {
+            'entityMap': {
+                '0': {
+                    'data': {'format': 'left', 'alt': 'an image', 'id': '1', 'src': '/media/not-found'},
+                    'mutability': 'IMMUTABLE', 'type': 'IMAGE'
+                },
+            },
+            'blocks': [
+                {'inlineStyleRanges': [], 'text': 'Milk', 'depth': 0, 'type': 'unordered-list-item', 'key': '00000', 'entityRanges': []},
+                {'inlineStyleRanges': [], 'text': 'Eggs', 'depth': 0, 'type': 'unordered-list-item', 'key': '00000', 'entityRanges': []},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 1, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'inlineStyleRanges': [], 'text': 'More milk', 'depth': 0, 'type': 'unordered-list-item', 'key': '00000', 'entityRanges': []},
+                {'inlineStyleRanges': [], 'text': 'More eggs', 'depth': 0, 'type': 'unordered-list-item', 'key': '00000', 'entityRanges': []},
+            ]
+        })
+
     @patch('wagtail.embeds.embeds.get_embed')
     def test_media_embed(self, get_embed):
         get_embed.return_value = Embed(
@@ -448,6 +510,62 @@ class TestHtmlToContentState(TestCase):
             }
         })
 
+    @patch('wagtail.embeds.embeds.get_embed')
+    def test_add_spacer_paras_between_media_embeds(self, get_embed):
+        get_embed.return_value = Embed(
+            url='https://www.youtube.com/watch?v=Kh0Y2hVe_bw',
+            max_width=None,
+            type='video',
+            html='test html',
+            title='what are birds',
+            author_name='look around you',
+            provider_name='YouTube',
+            thumbnail_url='http://test/thumbnail.url',
+            width=1000,
+            height=1000,
+        )
+
+        converter = ContentstateConverter(features=['embed'])
+        result = json.loads(converter.from_database_format(
+            '''
+            <embed embedtype="media" url="https://www.youtube.com/watch?v=Kh0Y2hVe_bw" />
+            <embed embedtype="media" url="https://www.youtube.com/watch?v=Kh0Y2hVe_bw" />
+            '''
+        ))
+        self.assertContentStateEqual(result, {
+            'blocks': [
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 0, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 1, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+            ],
+            'entityMap': {
+                '0': {
+                    'data': {
+                        'thumbnail': 'http://test/thumbnail.url',
+                        'embedType': 'video',
+                        'providerName': 'YouTube',
+                        'title': 'what are birds',
+                        'authorName': 'look around you',
+                        'url': 'https://www.youtube.com/watch?v=Kh0Y2hVe_bw'
+                    },
+                    'mutability': 'IMMUTABLE', 'type': 'EMBED'
+                },
+                '1': {
+                    'data': {
+                        'thumbnail': 'http://test/thumbnail.url',
+                        'embedType': 'video',
+                        'providerName': 'YouTube',
+                        'title': 'what are birds',
+                        'authorName': 'look around you',
+                        'url': 'https://www.youtube.com/watch?v=Kh0Y2hVe_bw'
+                    },
+                    'mutability': 'IMMUTABLE', 'type': 'EMBED'
+                },
+            }
+        })
+
     def test_hr(self):
         converter = ContentstateConverter(features=['hr'])
         result = json.loads(converter.from_database_format(
@@ -468,6 +586,34 @@ class TestHtmlToContentState(TestCase):
                     'data': {},
                     'mutability': 'IMMUTABLE', 'type': 'HORIZONTAL_RULE'
                 }
+            }
+        })
+
+    def test_add_spacer_paragraph_between_hrs(self):
+        converter = ContentstateConverter(features=['hr'])
+        result = json.loads(converter.from_database_format(
+            '''
+            <hr />
+            <hr />
+            '''
+        ))
+        self.assertContentStateEqual(result, {
+            'blocks': [
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 0, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 1, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
+            ],
+            'entityMap': {
+                '0': {
+                    'data': {},
+                    'mutability': 'IMMUTABLE', 'type': 'HORIZONTAL_RULE'
+                },
+                '1': {
+                    'data': {},
+                    'mutability': 'IMMUTABLE', 'type': 'HORIZONTAL_RULE'
+                },
             }
         })
 
@@ -533,10 +679,12 @@ class TestHtmlToContentState(TestCase):
         ))
         # ignoring the paragraph completely would probably be better,
         # but we'll settle for an empty preceding paragraph and not crashing as the next best thing...
+        # (and if it's the first/last block we actually do want a spacer paragraph anyhow)
         self.assertContentStateEqual(result, {
             'blocks': [
                 {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
                 {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [{'key': 0, 'offset': 0, 'length': 1}], 'depth': 0, 'text': ' ', 'type': 'atomic'},
+                {'key': '00000', 'inlineStyleRanges': [], 'entityRanges': [], 'depth': 0, 'text': '', 'type': 'unstyled'},
             ],
             'entityMap': {
                 '0': {
@@ -544,4 +692,18 @@ class TestHtmlToContentState(TestCase):
                     'mutability': 'IMMUTABLE', 'type': 'HORIZONTAL_RULE'
                 }
             }
+        })
+
+    def test_html_entities(self):
+        converter = ContentstateConverter(features=[])
+        result = json.loads(converter.from_database_format(
+            '''
+            <p>Arthur &quot;two sheds&quot; Jackson &lt;the third&gt; &amp; his wife</p>
+            '''
+        ))
+        self.assertContentStateEqual(result, {
+            'entityMap': {},
+            'blocks': [
+                {'inlineStyleRanges': [], 'text': 'Arthur "two sheds" Jackson <the third> & his wife', 'depth': 0, 'type': 'unstyled', 'key': '00000', 'entityRanges': []},
+            ]
         })
