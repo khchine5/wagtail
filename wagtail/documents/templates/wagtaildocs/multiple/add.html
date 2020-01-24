@@ -1,12 +1,14 @@
 {% extends "wagtailadmin/base.html" %}
 {% load i18n %}
 {% load l10n %}
-{% load staticfiles %}
+{% load wagtailadmin_tags %}
 {% block titletag %}{% trans "Add multiple documents" %}{% endblock %}
 {% block extra_css %}
     {{ block.super }}
 
-    <link rel="stylesheet" href="{% static 'wagtaildocs/css/add-multiple.css' %}" type="text/css" />
+    {{ form_media.css }}
+
+    <link rel="stylesheet" href="{% versioned_static 'wagtaildocs/css/add-multiple.css' %}" type="text/css" />
 {% endblock %}
 
 {% block content %}
@@ -16,7 +18,7 @@
     <div class="nice-padding">
         <div class="drop-zone">
             <p>{% trans "Drag and drop documents into this area to upload immediately." %}</p>
-            <p>{{ help_text }}
+            <p>{{ help_text }}</p>
 
             <form action="{% url 'wagtaildocs:add_multiple' %}" method="POST" enctype="multipart/form-data">
                 <div class="replace-file-input">
@@ -56,7 +58,7 @@
                 </div>
             </div>
             <div class="right col9">
-                <p class="status-msg success">{% trans "Upload successful. Please update this documents with a more appropriate title, if necessary. You may also delete the document completely if the upload wasn't required." %}</p>
+                <p class="status-msg success">{% trans "Upload successful. Please update this document with a more appropriate title, if necessary. You may also delete the document completely if the upload wasn't required." %}</p>
                 <p class="status-msg failure">{% trans "Sorry, upload failed." %}</p>
                 <p class="status-msg failure error_messages"></p>
             </div>
@@ -67,14 +69,16 @@
 {% block extra_js %}
     {{ block.super }}
 
+    {{ form_media.js }}
+
     <!-- this exact order of plugins is vital -->
-    <script src="{% static 'wagtailadmin/js/vendor/jquery.iframe-transport.js' %}"></script>
-    <script src="{% static 'wagtailadmin/js/vendor/jquery.fileupload.js' %}"></script>
-    <script src="{% static 'wagtailadmin/js/vendor/jquery.fileupload-process.js' %}"></script>
-    <script src="{% static 'wagtailadmin/js/vendor/tag-it.js' %}"></script>
+    <script src="{% versioned_static 'wagtailadmin/js/vendor/jquery.iframe-transport.js' %}"></script>
+    <script src="{% versioned_static 'wagtailadmin/js/vendor/jquery.fileupload.js' %}"></script>
+    <script src="{% versioned_static 'wagtailadmin/js/vendor/jquery.fileupload-process.js' %}"></script>
+    <script src="{% versioned_static 'wagtailadmin/js/vendor/tag-it.js' %}"></script>
 
     <!-- Main script -->
-    <script src="{% static 'wagtaildocs/js/add-multiple.js' %}"></script>
+    <script src="{% versioned_static 'wagtaildocs/js/add-multiple.js' %}"></script>
 
     {% url 'wagtailadmin_tag_autocomplete' as autocomplete_url %}
     <script>

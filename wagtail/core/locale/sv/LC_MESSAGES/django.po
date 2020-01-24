@@ -4,14 +4,15 @@
 #
 # Translators:
 # Jim Brouzoulis <jim.brouzoulis@chalmers.se>, 2017
+# Philip Andersen <renegadevi@codeofmagi.net>, 2018-2019
 # Thomas Kunambi <kunambi@gmail.com>, 2016-2017
 msgid ""
 msgstr ""
 "Project-Id-Version: Wagtail\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-16 11:28+0000\n"
-"PO-Revision-Date: 2018-01-26 15:58+0000\n"
-"Last-Translator: Matt Westcott <matthew@torchbox.com>\n"
+"POT-Creation-Date: 2019-10-16 17:59+0100\n"
+"PO-Revision-Date: 2019-12-02 08:50+0000\n"
+"Last-Translator: Philip Andersen <renegadevi@codeofmagi.net>\n"
 "Language-Team: Swedish (http://www.transifex.com/torchbox/wagtail/language/"
 "sv/)\n"
 "MIME-Version: 1.0\n"
@@ -20,9 +21,12 @@ msgstr ""
 "Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#, python-brace-format
-msgid "{label}: this block has no options."
-msgstr "{label}: det här blocket har inga inställningar."
+msgid "Wagtail core"
+msgstr "Wagtail kärna"
+
+#, python-format
+msgid "%(label)s: this block has no options."
+msgstr "%(label)s: det här blocket har inga inställningar."
 
 msgid "This block has no options."
 msgstr "Detta block har inga inställningar."
@@ -176,6 +180,9 @@ msgstr "schemalagd"
 msgid "draft"
 msgstr "utkast"
 
+msgid "live + scheduled"
+msgstr "live + schemalagd"
+
 msgid "live + draft"
 msgstr "publicerad + utkast"
 
@@ -301,6 +308,9 @@ msgstr "rättighet"
 
 msgid "group collection permission"
 msgstr "gruppsamlingsrättighet"
+
+msgid "group collection permissions"
+msgstr "gruppsamlingsbehörigheter"
 
 msgid "Log in"
 msgstr "Logga in"

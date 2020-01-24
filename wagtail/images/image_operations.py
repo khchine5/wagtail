@@ -217,6 +217,20 @@ class WidthHeightOperation(Operation):
         return willow.resize((width, height))
 
 
+class ScaleOperation(Operation):
+    def construct(self, percent):
+        self.percent = float(percent)
+
+    def run(self, willow, image, env):
+        image_width, image_height = willow.get_size()
+
+        scale = self.percent / 100
+        width = int(image_width * scale)
+        height = int(image_height * scale)
+
+        return willow.resize((width, height))
+
+
 class JPEGQualityOperation(Operation):
     def construct(self, quality):
         self.quality = int(quality)
@@ -232,8 +246,9 @@ class FormatOperation(Operation):
     def construct(self, fmt):
         self.format = fmt
 
-        if self.format not in ['jpeg', 'png', 'gif']:
-            raise ValueError("Format must be either 'jpeg', 'png' or 'gif'")
+        if self.format not in ['jpeg', 'png', 'gif', 'webp']:
+            raise ValueError(
+                "Format must be either 'jpeg', 'png', 'gif', or 'webp'")
 
     def run(self, willow, image, env):
         env['output-format'] = self.format
