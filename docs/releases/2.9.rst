@@ -14,7 +14,8 @@ What's new
 Other features
 ~~~~~~~~~~~~~~
 
- * ...
+ * Reduced contrast of rich text toolbar (Jack Paine)
+ * Support the rel attribute on custom ModelAdmin buttons (Andy Chosak)
 
 
 Bug fixes
@@ -23,6 +24,8 @@ Bug fixes
  * Added ARIA alert role to live search forms in the admin (Casper Timmers)
  * Reordered login form elements to match expected tab order (Kjartan Sverrisson)
  * Re-added 'Close Explorer' button on mobile viewports (Sævar Öfjörð Magnússon)
+ * Added a more descriptive label to Password reset link for screen reader users (Casper Timmers, Martin Coote)
+ * Improved Wagtail logo contrast by adding a background (Brian Edelman, Simon Evans, Ben Enright)
 
 Upgrade considerations
 ======================

@@ -428,6 +428,8 @@ Contributors
 * Johannes Vogel
 * Sam Costigan
 * Eric Sherman
+* Martin Coote
+* Simon Evans
 
 Translators
 ===========
