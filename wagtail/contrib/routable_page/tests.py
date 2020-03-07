@@ -1,6 +1,7 @@
 from unittest import mock
 
 from django.test import RequestFactory, TestCase
+from django.test.utils import override_settings
 from django.urls.exceptions import NoReverseMatch
 
 from wagtail.contrib.routable_page.templatetags.wagtailroutablepage_tags import routablepageurl
@@ -129,6 +130,18 @@ class TestRoutablePage(TestCase):
 
         self.assertContains(response, "EXTERNAL VIEW: ARG NOT SET")
 
+    def test_get_external_view_allows_punctuation(self):
+        response = self.client.get(self.routable_page.url + "external/joe-._~bloggs/")
+
+        self.assertContains(response, "EXTERNAL VIEW: joe-._~bloggs")
+
+    @override_settings(WAGTAIL_APPEND_SLASH=False, APPEND_SLASH=False)
+    def test_get_external_view_allows_punctuation_no_append_slash_with_slash(self):
+        # We are testing this with a slash because of this issue: https://github.com/wagtail/wagtail/issues/2871
+        response = self.client.get(self.routable_page.url + "external/joe-._~bloggs/")
+
+        self.assertContains(response, "EXTERNAL VIEW: joe-._~bloggs")
+
     def test_routable_page_can_have_instance_bound_descriptors(self):
         # This descriptor pretends that it does not exist in the class, hence
         # it raises an AttributeError when class bound. This is, for instance,
@@ -159,7 +172,6 @@ class TestRoutablePageTemplateTag(TestCase):
 
         self.rf = RequestFactory()
         self.request = self.rf.get(self.routable_page.url)
-        self.request.site = Site.find_for_request(self.request)
         self.context = {'request': self.request}
 
     def test_templatetag_reverse_index_route(self):
@@ -194,6 +206,7 @@ class TestRoutablePageTemplateTag(TestCase):
         self.assertEqual(url, expected)
 
 
+@override_settings(ALLOWED_HOSTS=['testserver', 'localhost', 'development.local'])
 class TestRoutablePageTemplateTagForSecondSiteAtSameRoot(TestCase):
     """
     When multiple sites exist on the same root page, relative URLs within that subtree should
@@ -215,10 +228,9 @@ class TestRoutablePageTemplateTagForSecondSiteAtSameRoot(TestCase):
 
         self.rf = RequestFactory()
         self.request = self.rf.get(self.routable_page.url)
-        self.request.site = Site.find_for_request(self.request)
         self.context = {'request': self.request}
-
-        self.request.site = second_site
+        self.request.META['HTTP_HOST'] = second_site.hostname
+        self.request.META['SERVER_PORT'] = second_site.port
 
     def test_templatetag_reverse_index_route(self):
         url = routablepageurl(self.context, self.routable_page,
@@ -252,6 +264,7 @@ class TestRoutablePageTemplateTagForSecondSiteAtSameRoot(TestCase):
         self.assertEqual(url, expected)
 
 
+@override_settings(ALLOWED_HOSTS=['testserver', 'localhost', 'events.local'])
 class TestRoutablePageTemplateTagForSecondSiteAtDifferentRoot(TestCase):
     """
     When multiple sites exist, relative URLs between such sites should include the domain portion
@@ -274,10 +287,11 @@ class TestRoutablePageTemplateTagForSecondSiteAtDifferentRoot(TestCase):
 
         self.rf = RequestFactory()
         self.request = self.rf.get(self.routable_page.url)
-        self.request.site = Site.find_for_request(self.request)
         self.context = {'request': self.request}
 
-        self.request.site = second_site
+        self.request.META['HTTP_HOST'] = second_site.hostname
+        self.request.META['SERVER_PORT'] = second_site.port
+
 
     def test_templatetag_reverse_index_route(self):
         url = routablepageurl(self.context, self.routable_page,

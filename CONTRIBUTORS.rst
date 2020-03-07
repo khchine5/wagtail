@@ -431,6 +431,13 @@ Contributors
 * Martin Coote
 * Simon Evans
 * Arkadiusz Michał Ryś
+* James O'Toole
+* Storm Heg
+* Daniel (aritas1)
+* timmysmalls
+* dtwm
+* Steve Lyall
+* Lars van de Kerkhof
 
 Translators
 ===========

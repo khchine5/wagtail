@@ -14,9 +14,18 @@ What's new
 Other features
 ~~~~~~~~~~~~~~
 
+ * Skip page validation when unpublishing a page (Samir Shah)
+ * Added :ref:`streamfield_multiplechoiceblock` block type for StreamField (James O'Toole)
+ * ChoiceBlock now accepts a ``widget`` keyword argument (James O'Toole)
  * Reduced contrast of rich text toolbar (Jack Paine)
  * Support the rel attribute on custom ModelAdmin buttons (Andy Chosak)
  * Server-side page slug generation now respects ``WAGTAIL_ALLOW_UNICODE_SLUGS`` (Arkadiusz Michał Ryś)
+ * Wagtail admin no longer depends on SiteMiddleware, avoiding incompatibility with Django sites framework and redundant database queries (aritas1, timmysmalls, Matt Westcott)
+ * Tag field autocompletion now handles custom tag models (Matt Westcott)
+ * ``wagtail_serve`` URL route can now be omitted for headless sites (Storm Heg)
+ * Allow free tagging to be disabled on custom tag models (Matt Westcott)
+ * Allow disabling page preview by setting ``preview_modes`` to an empty list (Casper Timmers)
+ * Add Vidyard to oEmbed provider list (Steve Lyall)
 
 
 Bug fixes
@@ -27,7 +36,24 @@ Bug fixes
  * Re-added 'Close Explorer' button on mobile viewports (Sævar Öfjörð Magnússon)
  * Added a more descriptive label to Password reset link for screen reader users (Casper Timmers, Martin Coote)
  * Improved Wagtail logo contrast by adding a background (Brian Edelman, Simon Evans, Ben Enright)
+ * Prevent duplicate notification messages on page locking (Jacob Topp-Mugglestone)
+ * Rendering of non field errors for InlinePanel items (Storm Heg)
+ * ``{% image ... as var %}`` now clears the context variable when passed None as an image (Maylon Pedroso)
+ * Allow RFC 3986-permitted punctuation in custom URL routes such as ``RoutablePageMixin`` (Storm Heg)
+ * ``refresh_index`` method on Elasticsearch no longer fails (Lars van de Kerkhof)
+ * Document tags no longer fail to update when replacing the document file at the same time (Matt Westcott)
+
 
 Upgrade considerations
 ======================
 
+Removed support for Django 2.1
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Django 2.1 is no longer supported as of this release; please upgrade to Django 2.2 or above before upgrading Wagtail.
+
+
+``SiteMiddleware`` and ``request.site`` deprecated
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Wagtail's :class:`~wagtail.core.middleware.SiteMiddleware`, which makes the current site object available as the property ``request.site``, is now deprecated as it clashes with Django's sites framework and makes unnecessary database queries on non-Wagtail views. References to ``request.site`` in your code should be removed; the recommended way of retrieving the current site is ``Site.find_for_request(request)`` in Python code, and the ``{% wagtail_site %}`` tag within Django templates. Once these are removed, ``'wagtail.core.middleware.SiteMiddleware'`` can be removed from your project's ``MIDDLEWARE`` setting.
